@@ -1,24 +1,89 @@
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
+import { useEffect, useState } from "react";
 
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-    "jsx": "react-jsx",
+const CLIENT_ID = "YOUR_CLIENT_ID";
+const API_KEY = "YOUR_API_KEY";
+const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
+const SCOPES = "https://www.googleapis.com/auth/calendar";
 
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
-  },
-  "include": ["src"]
+function App() {
+  const [gapiLoaded, setGapiLoaded] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+
+  useEffect(() => {
+    const initializeGapi = () => {
+      window.gapi.load("client:auth2", () => {
+        window.gapi.client
+          .init({
+            apiKey: API_KEY,
+            clientId: CLIENT_ID,
+            discoveryDocs: [DISCOVERY_DOC],
+            scope: SCOPES,
+          })
+          .then(() => {
+            setGapiLoaded(true);
+            const authInstance = window.gapi.auth2.getAuthInstance();
+            setIsSignedIn(authInstance.isSignedIn.get());
+            authInstance.isSignedIn.listen(setIsSignedIn);
+          });
+      });
+    };
+
+    if (window.gapi) {
+      initializeGapi();
+    } else {
+      console.error("GAPI not loaded");
+    }
+  }, []);
+
+  const signIn = () => {
+    window.gapi.auth2.getAuthInstance().signIn();
+  };
+
+  const addEvent = () => {
+    const event = {
+      summary: "Sample Event from Smart Scheduler",
+      start: {
+        dateTime: "2025-06-03T09:00:00-07:00",
+      },
+      end: {
+        dateTime: "2025-06-03T17:00:00-07:00",
+      },
+    };
+
+    window.gapi.client.calendar.events
+      .insert({
+        calendarId: "primary",
+        resource: event,
+      })
+      .then((res) => {
+        alert("Event created: " + res.result.htmlLink);
+      })
+      .catch((err) => {
+        console.error("Error creating event", err);
+      });
+  };
+
+  return (
+    <div className="p-8">
+      <h1 className="text-2xl font-bold">Smart Scheduler</h1>
+      {!isSignedIn && (
+        <button
+          onClick={signIn}
+          className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          Sign in with Google
+        </button>
+      )}
+      {isSignedIn && (
+        <button
+          onClick={addEvent}
+          className="mt-4 bg-green-500 text-white px-4 py-2 rounded"
+        >
+          Add Sample Event to Calendar
+        </button>
+      )}
+    </div>
+  );
 }
+
+export default App;
