@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-const CLIENT_ID = "YOUR_CLIENT_ID";
-const API_KEY = "YOUR_API_KEY";
+const CLIENT_ID = "435438617982-p5kugfnpjibs326213tv5b1u0cn8tr37.apps.googleusercontent.com";
+const API_KEY = "AIzaSyDeTNpN8-XSH9ZEVV1IA9EkZ1F4hiI4LB4";
 const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
 const SCOPES = "https://www.googleapis.com/auth/calendar";
 
